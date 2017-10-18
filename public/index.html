@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SOS</title>
+</head>
+<body>
+    <input type="text" id="username">
+    <button type="button" id="submitToQueButton" onclick="saveNameToQue()">Que me up!</button>
+
+    <ul id="que">
+
+    </ul>
+
+    <script>
+
+        function saveNameToQue(){
+
+            let username = document.getElementById("username").value;
+
+            console.log(username);
+
+            fetch(`/que/${username}`,{
+                method:"POST",
+            }).then(resp =>{
+               return resp.json(); 
+            }).then(json =>{
+                console.log(json);
+                updateQue(json);
+            }).catch(err => {
+                console.log(`Opps my bad ${err}`);
+            });
+
+        }
+
+        function updateQue(queData){
+            let que = document.getElementById("que");
+            que.innerHTML = "";
+
+            queData.forEach(item => {
+                let li = document.createElement("li");
+                li.innerHTML = item;
+
+                li.onclick = sender => {
+                    deleteFromList(item);
+                };
+
+                que.appendChild(li);
+            });
+
+        }
+
+    
+        function deleteFromList(userToDelete){
+            console.log(userToDelete);
+
+            fetch(`/que/${userToDelete}`,{
+                method:"DELETE"
+            }).then(res => {
+                return res.json();
+            }).then(json =>{
+                updateQue(json);
+            }).catch(err=>{
+                console.log("Oops "+ err);
+            });
+
+        }
+
+
+        let interval = setInterval(()=>{
+            fetch("/que").then(resp=>{
+                return resp.json();
+            }).then(json => {
+                updateQue(json);
+            }).catch(err=>{
+                console.log("Oops "+ err);
+            });
+        },10000);
+
+        </script>
+
+</body>
+</html>

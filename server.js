@@ -8,12 +8,22 @@ var complete = [];
 
 var superUser = process.env.superUser || "password";
 
+var ourSuperSimpelLogger = function(req,res,next){
+    console.log("Request ....");
+    next();
+}
+
+
 app.set('port', (process.env.PORT || 8080));
 app.use(express.static('public'));
 app.use(bodyParser.json());
 
+
+//app.use(ourSuperSimpelLogger);
+
 app.get('/', function (req, res) {
     let staticApp = readTextFile("public/index.html");
+    
     res.send(staticApp);
 });
 
@@ -21,7 +31,7 @@ app.get("/que", function (req, res) {
     res.json(que).end();
 });
 
-app.delete("/que/:name/:password", function (req, res) {
+app.delete("/que/:name/:password",ourSuperSimpelLogger, function (req, res) {
     let name = req.params.name;
     let resPassword = req.params.password;
 
@@ -48,9 +58,11 @@ app.delete("/que/:name/:password", function (req, res) {
 
 });
 
-app.post('/que/:name', function (req, res) {
+app.post('/que/', ourSuperSimpelLogger, function (req, res) {
 
-    let name = req.params.name;
+    res.setHeader('')
+        
+    let name = req.body.name;
 
     console.log(name)
 

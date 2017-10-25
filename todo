@@ -1,5 +1,0 @@
-* Connect to Database.
-* "Safe" keeping of database credentials & other stuff.
-* Saving usernames and passwords (never use username or email as key)
-* Sql primer. Select, Update, Delete.
-* Stored procedures?

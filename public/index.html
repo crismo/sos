@@ -9,22 +9,64 @@
 </head>
 
 <body>
-    <input type="text" id="username">
-    <button type="button" id="submitToQueButton" onclick="saveNameToQue()">Que me up!</button>
+    <input type="text" id="username" placeholder="request name">
+    <input type="text" id="problem" placeholder="What is your problem?">
+    <button type="button" id="submitToQueButton" onclick="submitRequestToQue()">Que me up!</button>
 
     <ul id="que">
 
     </ul>
 
-    <script>
-        function saveNameToQue() {
 
-            let username = document.getElementById("username").value;
+
+
+    <script>
+        let template = document.querySelector("data-template=nameTagTemplate").innerText;
+
+        userTag = template.replace(`-->${attribute}<--`, user.name);
+        document.body.appendChild(userTag);
+
+
+
+
+        let username;
+
+        let cookieSegments = document.cookie.split(";");
+
+        cookieSegments.forEach(segment => {
+            if (segment.startsWith("username=")) {
+                username = segment.replace("username=", "");
+            }
+        });
+
+        if (username) {
+            document.getElementById("username").value = username;
+        }
+
+
+        function submitRequestToQue() {
+
+            if (!username) {
+                username = document.getElementById("username").value;
+                document.getElementById("username").setAttribute("hidden", "");
+                document.cookie = `username=${username}`
+            }
+
+            let info = document.getElementById("problem").value;
 
             console.log(username);
+            console.log(info);
 
-            fetch(`/que/${username}`, {
+            fetch(`/que/`, {
                 method: "POST",
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: username,
+                    info: info
+                })
             }).then(resp => {
                 return resp.json();
             }).then(json => {
@@ -54,19 +96,22 @@
         }
 
         let password;
+        let user = "admin";
+        let basicAuth = "";
 
         function deleteFromList(userToDelete) {
             console.log(userToDelete);
 
-            if (password === null || password === undefined) {
+            if (password === null ||  password === undefined) {
                 password = prompt("What is the password?");
+                basicAuth = `${user}:${password}`;
             }
 
             fetch(`/que/${userToDelete}/${password}`, {
                 method: "DELETE"
             }).then(res => {
 
-                if(res.status >= 400){
+                if (res.status >= 400) {
                     password = null;
                     alert("Bad password");
                 }
@@ -93,6 +138,9 @@
         }, 10000);
     </script>
 
+
+
+    
 </body>
 
 </html>

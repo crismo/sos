@@ -17,20 +17,19 @@
 
     </ul>
 
-
-
+    <template data-template="QueInfoTemplate" type="text/html">
+        <li data-value="{{name}}">
+            <strong>{{name}}</strong> - {{info}}
+        </li>
+    </template>
 
     <script>
-        let template = document.querySelector("data-template=nameTagTemplate").innerText;
 
-        userTag = template.replace(`-->${attribute}<--`, user.name);
-        document.body.appendChild(userTag);
-
-
-
-
-        let username;
-
+        let password = null;
+        let adminUser = "admin";
+        let basicAuth = "";
+        let username = "";
+        
         let cookieSegments = document.cookie.split(";");
 
         cookieSegments.forEach(segment => {
@@ -42,7 +41,6 @@
         if (username) {
             document.getElementById("username").value = username;
         }
-
 
         function submitRequestToQue() {
 
@@ -60,7 +58,7 @@
             fetch(`/que/`, {
                 method: "POST",
                 headers: {
-                    'Accept': 'application/json, text/plain, */*',
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -82,40 +80,44 @@
             let que = document.getElementById("que");
             que.innerHTML = "";
 
-            queData.forEach(item => {
-                let li = document.createElement("li");
-                li.innerHTML = item;
+            queData.forEach(model => {
+                
+                let item = getTemplate("QueInfoTemplate")
+                item = item.replaceAll("{{name}}",model.name );
+                item = item.replaceAll("{{info}}", model.info);
+                let li = create(item);
 
                 li.onclick = sender => {
-                    deleteFromList(item);
+                    deleteFromList(model);
                 };
-
                 que.appendChild(li);
             });
 
         }
 
-        let password;
-        let user = "admin";
-        let basicAuth = "";
-
-        function deleteFromList(userToDelete) {
+        function deleteFromList(item) {
+            
+            let userToDelete = item.name;
             console.log(userToDelete);
 
             if (password === null ||  password === undefined) {
                 password = prompt("What is the password?");
-                basicAuth = `${user}:${password}`;
+                basicAuth = 'Basic ' + btoa(adminUser + ":" + password);
+                password ="ok";
             }
 
-            fetch(`/que/${userToDelete}/${password}`, {
-                method: "DELETE"
+            fetch(`/que/${userToDelete}/`, {
+                method: "DELETE",
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                    'Authorization': basicAuth
+                }
             }).then(res => {
-
                 if (res.status >= 400) {
                     password = null;
                     alert("Bad password");
                 }
-
                 return res.json();
             }).then(json => {
                 updateQue(json);
@@ -136,11 +138,30 @@
                 console.log("Oops " + err);
             });
         }, 10000);
+
+
+        function getTemplate(templateName) {
+            var selector = 'template[data-template="' + templateName + '"]';
+            var element = document.querySelector(selector);
+            return element.innerHTML.trim();
+        }
+
+        function create(element){
+            var div = document.createElement('div');
+            div.innerHTML = element;
+            return div.firstChild;
+        }
+
+        String.prototype.replaceAll = function(search, replacement) {
+            var target = this;
+            return target.split(search).join(replacement);
+        };
+
     </script>
 
 
 
-    
+
 </body>
 
 </html>

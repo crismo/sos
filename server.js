@@ -7,11 +7,10 @@ const auth = require('./js/authorize.js')("admin",process.env.superUser || "pass
 var que = [];
 var complete = [];
 
-
 app.set('port', (process.env.PORT || 8080));
 app.use(express.static('public'));
 app.use(bodyParser.json());
-
+app.listen(app.get('port'), function () { console.log('SOS server running', app.get('port'));});
 
 app.get('/',auth, function (req, res) {
     let staticApp = readTextFile("public/index.html");
@@ -39,7 +38,6 @@ app.delete("/que/:name/",auth, function (req, res) {
         }
 
         res.json(que);
-
     }
     
 });
@@ -64,6 +62,3 @@ app.post('/que/',  function (req, res) {
     res.json(que);
 });
 
-app.listen(app.get('port'), function () {
-    console.log('SOS server running', app.get('port'));
-});
